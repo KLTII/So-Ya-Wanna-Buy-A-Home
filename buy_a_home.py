@@ -271,25 +271,25 @@ desired_square_feet = st.sidebar.number_input(
 st.sidebar.subheader("Importance Weights")
 affordability_weight = st.sidebar.slider(
     "Affordability importance",
-    min_value=1,
+    min_value=0,
     max_value=10,
     value=5
 )
 space_weight = st.sidebar.slider(
     "Living space importance",
-    min_value=1,
+    min_value=0,
     max_value=10,
     value=5
 )
 privacy_weight = st.sidebar.slider(
     "Privacy importance",
-    min_value=1,
+    min_value=0,
     max_value=10,
     value=5
 )
 maintenance_weight = st.sidebar.slider(
     "Maintenance ease importance",
-    min_value=1,
+    min_value=0,
     max_value=10,
     value=5
 )
@@ -335,7 +335,7 @@ results_df = pd.DataFrame(results)
 if sum(weights.values()) == 0:
     st.warning("Set at least one importance weight above zero.")
     st.stop()
-    
+
 st.header("Buyer Preference Scoring")
 scoring_results = []
 for property_data in properties:
