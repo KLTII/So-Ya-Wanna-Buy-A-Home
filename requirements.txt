@@ -6,4 +6,4 @@ numpy
 scipy
 matplotlib
 statsmodels
-sklearn
+scikit-learn
