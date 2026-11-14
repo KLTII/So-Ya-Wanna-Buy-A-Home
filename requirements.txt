@@ -2,3 +2,8 @@ streamlit
 pandas
 plotly
 pytest
+numpy
+scipy
+matplotlib
+statsmodels
+sklearn
