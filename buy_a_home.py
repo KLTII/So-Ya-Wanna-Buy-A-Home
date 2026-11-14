@@ -17,6 +17,11 @@ import streamlit as st
 import pytest
 from core.financial import monthly_ownership_cost
 from core.financial import mortgage_payment
+from core.scoring import (
+    affordability_score,
+    space_score,
+    weighted_score
+)
 
 st.set_page_config(page_title="So Ya Wanna Buy A Home", page_icon="", layout="wide")
 st.title("So Ya Wanna Buy A Home")
@@ -49,7 +54,7 @@ with st.form("property_form"):
             housing_type = st.selectbox(
                 "Housing type",
                 options=housing_types,
-                # index=i,
+                index=i,
                 key=f"housing_type_{i}"
             )
             price = st.number_input(
@@ -87,6 +92,27 @@ with st.form("property_form"):
                 step=25.0,
                 key=f"maintenance_{i}"
             )
+            square_feet = st.number_input(
+                "Living area (square feet)",
+                min_value=1,
+                value=1500,
+                step=10,
+                key=f"square_feet_{i}"
+            )
+            privacy = st.slider(
+                "Privacy rating (1-10)",
+                min_value=1,
+                max_value=10,
+                value=5,
+                key=f"privacy_{i}"
+            )
+            maintenance_ease = st.slider(
+                "Maintenance ease (1-10)",
+                min_value=1,
+                max_value=10,
+                value=5,
+                key=f"maintenance_ease_{i}"
+            )
             # Store each property as a dictionary
             properties.append({
                 "Property": property_label,
@@ -96,7 +122,10 @@ with st.form("property_form"):
                 "Tax": tax,
                 "Insurance": insurance,
                 "HOA": hoa,
-                "Maintenance": maintenance
+                "Maintenance": maintenance,
+                "Square Feet": square_feet,
+                "Privacy": privacy,
+                "Maintenance Ease": maintenance_ease
             })
     # One button submits all 3 columns
     submitted = st.form_submit_button("Compare Properties")
@@ -231,10 +260,52 @@ monthly_budget = st.sidebar.number_input(
     value=3500.0,
     step=100.0
 )
+
+st.sidebar.header("Buyer Preferences")
+desired_square_feet = st.sidebar.number_input(
+    "Desired living area (sq ft)",
+    min_value=100,
+    value=1800,
+    step=100
+)
+st.sidebar.subheader("Importance Weights")
+affordability_weight = st.sidebar.slider(
+    "Affordability importance",
+    min_value=1,
+    max_value=10,
+    value=5
+)
+space_weight = st.sidebar.slider(
+    "Living space importance",
+    min_value=1,
+    max_value=10,
+    value=5
+)
+privacy_weight = st.sidebar.slider(
+    "Privacy importance",
+    min_value=1,
+    max_value=10,
+    value=5
+)
+maintenance_weight = st.sidebar.slider(
+    "Maintenance ease importance",
+    min_value=1,
+    max_value=10,
+    value=5
+)
+weights = {
+    "Affordability": affordability_weight,
+    "Living Space": space_weight,
+    "Privacy": privacy_weight,
+    "Maintenance Ease": maintenance_weight
+}
+
 st.header("Financial Comparison")
+# if st.session_state.properties is not None:
 results = []
 cost_breakdowns = []
 for property_data in properties:
+    # Calculate monthly ownership cost
     costs = monthly_ownership_cost(
         price=property_data["Price"],
         down_payment_percent=down_payment,
@@ -260,6 +331,99 @@ for property_data in properties:
     
 
 results_df = pd.DataFrame(results)
+
+if sum(weights.values()) == 0:
+    st.warning("Set at least one importance weight above zero.")
+    st.stop()
+    
+st.header("Buyer Preference Scoring")
+scoring_results = []
+for property_data in properties:
+    # Calculate monthly ownership cost
+    costs = monthly_ownership_cost(
+        price=property_data["Price"],
+        down_payment_percent=down_payment,
+        annual_rate=interest_rate / 100,
+        years=loan_years,
+        annual_property_tax=property_data["Tax"],
+        annual_insurance=property_data["Insurance"],
+        monthly_hoa=property_data["HOA"],
+        monthly_maintenance=property_data["Maintenance"]
+    )
+    # Calculate criterion scores
+    scores = {
+        "Affordability": affordability_score(
+            costs["Total"],
+            monthly_budget
+        ),
+        "Living Space": space_score(
+            property_data["Square Feet"],
+            desired_square_feet
+        ),
+        "Privacy": property_data["Privacy"] * 10,
+        "Maintenance Ease": (property_data["Maintenance Ease"] * 10)
+    }
+    # Calculate weighted total
+    total_score = weighted_score(scores, weights)
+    scoring_results.append({
+        "Property": property_data["Property"],
+        "Housing Type": property_data["Housing Type"],
+        "Monthly Cost": costs["Total"],
+        "Within Budget": costs["Total"] <= monthly_budget,
+        ** scores,
+        "Overall Score": total_score
+    })
+scoring_df = pd.DataFrame(scoring_results)
+# Sort properties by overall score
+scoring_df = scoring_df.sort_values(
+    by="Overall Score",
+    ascending=False
+)
+st.dataframe(
+    scoring_df,
+    hide_index=True,
+    width="stretch"
+)
+
+st.subheader("Overall Property Scores")
+fig = px.bar(
+    scoring_df,
+    x="Property",
+    y="Overall Score",
+    color="Housing Type",
+    text="Overall Score",
+    title="Weighted Property Comparison"
+)
+fig.update_traces(
+    texttemplate="%{text:.1f}",
+    textposition="outside"
+)
+fig.update_yaxes(range=[0, 110])
+st.plotly_chart(fig, width="stretch")
+
+st.subheader("Property Recommendation")
+if sum(weights.values()) == 0:
+    st.warning(
+        "Select at least one importance weight above zero."
+    )
+else:
+    affordability_properties = scoring_df[scoring_df["Within Budget"]]
+    if affordability_properties.empty:
+        st.warning(
+            "None of the properties meet your monthly budget. "
+            "Review your options before making a decision."
+        )
+    else:
+        best_property = affordability_properties.iloc[0]
+        st.success(
+            f"Based on your preferences, "
+            f"{best_property['Property']} "
+            f"({best_property['Housing Type']}) "
+            f"is your highest scoring property within budget, "
+            f"with a score of "
+            f"{best_property['Overall Score']:.1f}/100"
+        )
+
 costs_df = pd.DataFrame(cost_breakdowns)
 
 summary_columns = st.columns(3)
