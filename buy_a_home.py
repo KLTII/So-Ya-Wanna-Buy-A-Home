@@ -503,190 +503,190 @@ else:
         f"${cheapest['Total Monthly Cost']:,.2f}."
     )
 
-st.info(
-    "These estimates exclude PMI, utilities, closing costs, "
-    "and other potential ownership expenses. "
-    "The lowest cost property is not necessarily the best "
-    "overall choice."
-)
+# st.info(
+#     "These estimates exclude PMI, utilities, closing costs, "
+#     "and other potential ownership expenses. "
+#     "The lowest cost property is not necessarily the best "
+#     "overall choice."
+# )
 
 # form1.header("3 options to choose from")
 # home1 = form1.text_input("Enter the 1st property you're interested in")
 # home2 = form1.text_input("Enter the 2nd property you're interested in")
 # home3 = form1.text_input("Enter the 3rd property you're interested in")
-st.write("3 options to choose from")
-with st.form(key="option1"):
-    home1 = st.text_input("Enter the 1st property you're interested in", key="h1")
-    purchasePrice1 = st.text_input("Enter the purchase price")
-    downPayment1 = st.text_input("Enter the down payment amount")
-    closingCosts1 = st.text_input("Enter the closing costs")
-    yearBuilt1 = st.text_input("Enter the year built")
-    propertyTaxRate1 = st.text_input("Enter the property tax rate")
-    insurance1 = st.text_input("Enter the monthly insurance cost")
-    hoa1 = st.text_input("Enter the monthly HOA fee")
-    electricity1 = st.text_input("Enter the monthly cost for electricity")
-    water1 = st.text_input("Enter the monthly cost for water")
-    sewer1 = st.text_input("Enter the monthly cost for sewer")
-    garbage1 = st.text_input("Enter the monthly cost for garbage")
-    gas1 = st.text_input("Enter the monthly cost for gas")
-    entered1 = st.form_submit_button("Enter")
-with st.form(key="option2"):
-    home2 = st.text_input("Enter the 2nd property you're interested in", key="h2")
-    purchasePrice2 = st.text_input("Enter the purchase price")
-    downPayment2 = st.text_input("Enter the down payment amount")
-    closingCosts2 = st.text_input("Enter the closing costs")
-    yearBuilt2 = st.text_input("Enter the year built")
-    propertyTaxRate2 = st.text_input("Enter the property tax rate")
-    insurance2 = st.text_input("Enter the monthly insurance cost")
-    hoa2 = st.text_input("Enter the monthly HOA fee")
-    electricity2 = st.text_input("Enter the monthly cost for electricity")
-    water2 = st.text_input("Enter the monthly cost for water")
-    sewer2 = st.text_input("Enter the monthly cost for sewer")
-    garbage2 = st.text_input("Enter the monthly cost for garbage")
-    gas2 = st.text_input("Enter the monthly cost for gas")
-    entered2 = st.form_submit_button("Enter")
-with st.form(key="option3"):
-    home3 = st.text_input("Enter the 3rd property you're interested in", key="h3")
-    purchasePrice3 = st.text_input("Enter the purchase price")
-    downPayment3 = st.text_input("Enter the down payment amount")
-    closingCosts3 = st.text_input("Enter the closing costs")
-    yearBuilt3 = st.text_input("Enter the year built")
-    propertyTaxRate3 = st.text_input("Enter the property tax rate")
-    insurance3 = st.text_input("Enter the monthly insurance cost")
-    hoa3 = st.text_input("Enter the monthly HOA fee")
-    electricity3 = st.text_input("Enter the monthly cost for electricity")
-    water3 = st.text_input("Enter the monthly cost for water")
-    sewer3 = st.text_input("Enter the monthly cost for sewer")
-    garbage3 = st.text_input("Enter the monthly cost for garbage")
-    gas3 = st.text_input("Enter the monthly cost for gas")
-    entered3 = st.form_submit_button("Enter")
-with st.form(key="generals"):
-    interestRate = st.text_input("Enter the interest rate")
-    loanTerm = st.text_input("Enter the loan term")
-    internet = st.text_input("Enter the monthly cost for internet")
-entered4 = st.button("Enter")
-form1 = st.form(key="3 options")
-if entered1:
-    form1.write(f"Property 1:  {home1}")
-    form1.write(f"Purchase Price:  {purchasePrice1}")
-    form1.write(f"Down Payment Amount:  {downPayment1}")
-    form1.write(f"Closing Costs:  {closingCosts1}")
-    form1.write(f"Year Built:  {yearBuilt1}")
-    form1.write(f"Property Tax:  {propertyTaxRate1}")
-    form1.write(f"Insurance:  {insurance1}")
-    form1.write(f"HOA fee:  {hoa1}")
-    form1.write(f"Electricity:  {electricity1}")
-    form1.write(f"Water:  {water1}")
-    form1.write(f"Sewer:  {sewer1}")
-    form1.write(f"Garbage:  {garbage1}")
-    form1.write(f"Gas:  {gas1}")
+# st.write("3 options to choose from")
+# with st.form(key="option1"):
+#     home1 = st.text_input("Enter the 1st property you're interested in", key="h1")
+#     purchasePrice1 = st.text_input("Enter the purchase price")
+#     downPayment1 = st.text_input("Enter the down payment amount")
+#     closingCosts1 = st.text_input("Enter the closing costs")
+#     yearBuilt1 = st.text_input("Enter the year built")
+#     propertyTaxRate1 = st.text_input("Enter the property tax rate")
+#     insurance1 = st.text_input("Enter the monthly insurance cost")
+#     hoa1 = st.text_input("Enter the monthly HOA fee")
+#     electricity1 = st.text_input("Enter the monthly cost for electricity")
+#     water1 = st.text_input("Enter the monthly cost for water")
+#     sewer1 = st.text_input("Enter the monthly cost for sewer")
+#     garbage1 = st.text_input("Enter the monthly cost for garbage")
+#     gas1 = st.text_input("Enter the monthly cost for gas")
+#     entered1 = st.form_submit_button("Enter")
+# with st.form(key="option2"):
+#     home2 = st.text_input("Enter the 2nd property you're interested in", key="h2")
+#     purchasePrice2 = st.text_input("Enter the purchase price")
+#     downPayment2 = st.text_input("Enter the down payment amount")
+#     closingCosts2 = st.text_input("Enter the closing costs")
+#     yearBuilt2 = st.text_input("Enter the year built")
+#     propertyTaxRate2 = st.text_input("Enter the property tax rate")
+#     insurance2 = st.text_input("Enter the monthly insurance cost")
+#     hoa2 = st.text_input("Enter the monthly HOA fee")
+#     electricity2 = st.text_input("Enter the monthly cost for electricity")
+#     water2 = st.text_input("Enter the monthly cost for water")
+#     sewer2 = st.text_input("Enter the monthly cost for sewer")
+#     garbage2 = st.text_input("Enter the monthly cost for garbage")
+#     gas2 = st.text_input("Enter the monthly cost for gas")
+#     entered2 = st.form_submit_button("Enter")
+# with st.form(key="option3"):
+#     home3 = st.text_input("Enter the 3rd property you're interested in", key="h3")
+#     purchasePrice3 = st.text_input("Enter the purchase price")
+#     downPayment3 = st.text_input("Enter the down payment amount")
+#     closingCosts3 = st.text_input("Enter the closing costs")
+#     yearBuilt3 = st.text_input("Enter the year built")
+#     propertyTaxRate3 = st.text_input("Enter the property tax rate")
+#     insurance3 = st.text_input("Enter the monthly insurance cost")
+#     hoa3 = st.text_input("Enter the monthly HOA fee")
+#     electricity3 = st.text_input("Enter the monthly cost for electricity")
+#     water3 = st.text_input("Enter the monthly cost for water")
+#     sewer3 = st.text_input("Enter the monthly cost for sewer")
+#     garbage3 = st.text_input("Enter the monthly cost for garbage")
+#     gas3 = st.text_input("Enter the monthly cost for gas")
+#     entered3 = st.form_submit_button("Enter")
+# with st.form(key="generals"):
+#     interestRate = st.text_input("Enter the interest rate")
+#     loanTerm = st.text_input("Enter the loan term")
+#     internet = st.text_input("Enter the monthly cost for internet")
+# entered4 = st.button("Enter")
+# form1 = st.form(key="3 options")
+# if entered1:
+#     form1.write(f"Property 1:  {home1}")
+#     form1.write(f"Purchase Price:  {purchasePrice1}")
+#     form1.write(f"Down Payment Amount:  {downPayment1}")
+#     form1.write(f"Closing Costs:  {closingCosts1}")
+#     form1.write(f"Year Built:  {yearBuilt1}")
+#     form1.write(f"Property Tax:  {propertyTaxRate1}")
+#     form1.write(f"Insurance:  {insurance1}")
+#     form1.write(f"HOA fee:  {hoa1}")
+#     form1.write(f"Electricity:  {electricity1}")
+#     form1.write(f"Water:  {water1}")
+#     form1.write(f"Sewer:  {sewer1}")
+#     form1.write(f"Garbage:  {garbage1}")
+#     form1.write(f"Gas:  {gas1}")
 
-if entered2:
-    form1.write(f"Property 2:  {home2}")
-    form1.write(f"Purchase Price:  {purchasePrice2}")
-    form1.write(f"Down Payment Amount:  {downPayment2}")
-    form1.write(f"Closing Costs:  {closingCosts2}")
-    form1.write(f"Year Built:  {yearBuilt2}")
-    form1.write(f"Property Tax:  {propertyTaxRate2}")
-    form1.write(f"Insurance:  {insurance2}")
-    form1.write(f"HOA fee:  {hoa2}")
-    form1.write(f"Electricity:  {electricity2}")
-    form1.write(f"Water:  {water2}")
-    form1.write(f"Sewer:  {sewer2}")
-    form1.write(f"Garbage:  {garbage2}")
-    form1.write(f"Gas:  {gas2}")
+# if entered2:
+#     form1.write(f"Property 2:  {home2}")
+#     form1.write(f"Purchase Price:  {purchasePrice2}")
+#     form1.write(f"Down Payment Amount:  {downPayment2}")
+#     form1.write(f"Closing Costs:  {closingCosts2}")
+#     form1.write(f"Year Built:  {yearBuilt2}")
+#     form1.write(f"Property Tax:  {propertyTaxRate2}")
+#     form1.write(f"Insurance:  {insurance2}")
+#     form1.write(f"HOA fee:  {hoa2}")
+#     form1.write(f"Electricity:  {electricity2}")
+#     form1.write(f"Water:  {water2}")
+#     form1.write(f"Sewer:  {sewer2}")
+#     form1.write(f"Garbage:  {garbage2}")
+#     form1.write(f"Gas:  {gas2}")
 
-if entered3:
-    form1.write(f"Property 3:  {home3}")
-    form1.write(f"Purchase Price:  {purchasePrice3}")
-    form1.write(f"Down Payment Amount:  {downPayment3}")
-    form1.write(f"Closing Costs:  {closingCosts3}")
-    form1.write(f"Year Built:  {yearBuilt3}")
-    form1.write(f"Property Tax:  {propertyTaxRate3}")
-    form1.write(f"Insurance:  {insurance3}")
-    form1.write(f"HOA fee:  {hoa3}")
-    form1.write(f"Electricity:  {electricity3}")
-    form1.write(f"Water:  {water3}")
-    form1.write(f"Sewer:  {sewer3}")
-    form1.write(f"Garbage:  {garbage3}")
-    form1.write(f"Gas:  {gas3}")
+# if entered3:
+#     form1.write(f"Property 3:  {home3}")
+#     form1.write(f"Purchase Price:  {purchasePrice3}")
+#     form1.write(f"Down Payment Amount:  {downPayment3}")
+#     form1.write(f"Closing Costs:  {closingCosts3}")
+#     form1.write(f"Year Built:  {yearBuilt3}")
+#     form1.write(f"Property Tax:  {propertyTaxRate3}")
+#     form1.write(f"Insurance:  {insurance3}")
+#     form1.write(f"HOA fee:  {hoa3}")
+#     form1.write(f"Electricity:  {electricity3}")
+#     form1.write(f"Water:  {water3}")
+#     form1.write(f"Sewer:  {sewer3}")
+#     form1.write(f"Garbage:  {garbage3}")
+#     form1.write(f"Gas:  {gas3}")
 
-if entered4:
-    form1.write(f"Interest Rate:  {interestRate}")
-    form1.write(f"Loan Term:  {loanTerm}")
-    form1.write(f"Internet:  {internet}")
+# if entered4:
+#     form1.write(f"Interest Rate:  {interestRate}")
+#     form1.write(f"Loan Term:  {loanTerm}")
+#     form1.write(f"Internet:  {internet}")
 
-def mortgage_payment(principal, annual_rate, years):
-    if principal < 0 or annual_rate < 0 or years <= 0:
-        raise ValueError("Invalid mortgage parameters")
-    n = years * 12
-    r = annual_rate / 12
-    if r == 0:
-        return principal / n
-    growth = math.pow(1 + r, n)
-    return principal * r * growth / (growth - 1)
+# def mortgage_payment(principal, annual_rate, years):
+#     if principal < 0 or annual_rate < 0 or years <= 0:
+#         raise ValueError("Invalid mortgage parameters")
+#     n = years * 12
+#     r = annual_rate / 12
+#     if r == 0:
+#         return principal / n
+#     growth = math.pow(1 + r, n)
+#     return principal * r * growth / (growth - 1)
 
-# purchasePrice1Int = int(purchasePrice1)
-# interestRateInt = int(interestRate)
-# loanTermInt = int(loanTerm)
-# payment1 = mortgage_payment(principal=purchasePrice1Int, annual_rate=interestRateInt, years=loanTermInt)
-# st.write(f"Monthly payment 1: ${payment1:,.2f}")
+# # purchasePrice1Int = int(purchasePrice1)
+# # interestRateInt = int(interestRate)
+# # loanTermInt = int(loanTerm)
+# # payment1 = mortgage_payment(principal=purchasePrice1Int, annual_rate=interestRateInt, years=loanTermInt)
+# # st.write(f"Monthly payment 1: ${payment1:,.2f}")
 
-payment = mortgage_payment(principal=100, annual_rate=0.05, years=30)
-st.write(f"Monthly payment: ${payment:,.2f}")
+# payment = mortgage_payment(principal=100, annual_rate=0.05, years=30)
+# st.write(f"Monthly payment: ${payment:,.2f}")
 
 
 
-button1 = st.button("Click Me")
-if button1:
-    st.write("This is some text")
+# button1 = st.button("Click Me")
+# if button1:
+#     st.write("This is some text")
 
-st.header("Start of the Checkbox Section")
-like = st.checkbox("Do you like this app?")
-button2 = st.button("Submit")
-if button2:
-    if like:
-        st.write("Thanks.  I like it too.")
-    else:
-        st.write("I'm sorry.  You have bad tastes.")
+# st.header("Start of the Checkbox Section")
+# like = st.checkbox("Do you like this app?")
+# button2 = st.button("Submit")
+# if button2:
+#     if like:
+#         st.write("Thanks.  I like it too.")
+#     else:
+#         st.write("I'm sorry.  You have bad tastes.")
 
-st.header("Start of the Radio Button Section")
-animal = st.radio("What animal is your favourite?", ("Lion", "Tiger", "Bear"))
-button3 = st.button("Submit Animal")
-if button3:
-    st.write(animal)
-    if animal == "Lion":
-        st.write("ROAR!")
+# st.header("Start of the Radio Button Section")
+# animal = st.radio("What animal is your favourite?", ("Lion", "Tiger", "Bear"))
+# button3 = st.button("Submit Animal")
+# if button3:
+#     st.write(animal)
+#     if animal == "Lion":
+#         st.write("ROAR!")
 
-st.header("Start of the Selectbox Section")
-animal2 = st.selectbox("What animal is your favourite?", ("Lion", "Tiger", "Bear"))
-button4 = st.button("Submit Animal 2")
-if button4:
-    st.write(animal2)
-    if animal2 == "Lion":
-        st.write("ROAR!")
+# st.header("Start of the Selectbox Section")
+# animal2 = st.selectbox("What animal is your favourite?", ("Lion", "Tiger", "Bear"))
+# button4 = st.button("Submit Animal 2")
+# if button4:
+#     st.write(animal2)
+#     if animal2 == "Lion":
+#         st.write("ROAR!")
 
-st.header("Start of the Multiselect Section")
-options = st.multiselect("What animals do you like?", ["Lion", "Tiger", "Bear"])
-button5 = st.button("Print Animals")
-if button5:
-    st.write(options)
+# st.header("Start of the Multiselect Section")
+# options = st.multiselect("What animals do you like?", ["Lion", "Tiger", "Bear"])
+# button5 = st.button("Print Animals")
+# if button5:
+#     st.write(options)
 
-st.header("Start of the Slider Section")
-epochs_num = st.slider("How many epochs?", 1, 100, 10)
-if st.button("Slider Button"):
-    st.write(epochs_num)
+# st.header("Start of the Slider Section")
+# epochs_num = st.slider("How many epochs?", 1, 100, 10)
+# if st.button("Slider Button"):
+#     st.write(epochs_num)
 
-st.header("Start of the Text Input Section")
-user_text = st.text_input("What's your favourite movie?", "Star Wars")
-if st.button("Text button"):
-    st.write(int(user_text))
+# st.header("Start of the Text Input Section")
+# user_text = st.text_input("What's your favourite movie?", "Star Wars")
+# if st.button("Text button"):
+#     st.write(int(user_text))
 
-user_num = st.number_input("What's your favourite number?")
-if st.button("Number Button"):
-    st.write(user_num)
+# user_num = st.number_input("What's your favourite number?")
+# if st.button("Number Button"):
+#     st.write(user_num)
 
-def run_sentiment_analysis(txt):
-    st.write(f"Analysis Done. {txt}")
-txt = st.text_area('Text to analyze', '''Quarterbacks Kirk Cousins (Atlanta to Las Vegas), Kyler Murray (Arizona to Minnesota), Tua Tagovailoa (Miami to Atlanta), and Malik Willis (Green Bay to Miami)''')
-st.write('Sentiment:', run_sentiment_analysis(txt))
+# def run_sentiment_analysis(txt):
+#     st.write(f"Analysis Done. {txt}")
+# txt = st.text_area('Text to analyze', '''Quarterbacks Kirk Cousins (Atlanta to Las Vegas), Kyler Murray (Arizona to Minnesota), Tua Tagovailoa (Miami to Atlanta), and Malik Willis (Green Bay to Miami)''')
+# st.write('Sentiment:', run_sentiment_analysis(txt))
