@@ -427,7 +427,6 @@ else:
 costs_df = pd.DataFrame(cost_breakdowns)
 
 summary_columns = st.columns(3)
-
 for i, result in enumerate(results):
     with summary_columns[i]:
         st.metric(
