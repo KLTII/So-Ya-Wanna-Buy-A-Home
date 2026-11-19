@@ -22,6 +22,7 @@ from core.scoring import (
     space_score,
     weighted_score
 )
+from core.sensitivity import calculate_sensitivity
 
 st.set_page_config(page_title="So Ya Wanna Buy A Home", page_icon="", layout="wide")
 st.title("So Ya Wanna Buy A Home")
@@ -373,6 +374,45 @@ for property_data in properties:
         ** scores,
         "Overall Score": total_score
     })
+
+st.header("Financial Sensitivity Analysis")
+st.write(
+    "Explore how changing financial assumptions "
+    "affect the monthly ownership costs of "
+    "your selected properties."
+)
+for property_data in properties:
+    sensitivity_variable = st.selectbox(
+        "Choose a financial variable to analyze",
+        options=["Interest Rate", "Down Payment"]
+    )
+    if sensitivity_variable == "Interest Rate":
+        min_value, max_value = st.slider(
+            "Interest rate change (%)",
+            min_value=0.0,
+            max_value=15.0,
+            value=(4.0, 9.0),
+            step=0.5
+        )
+        sensitivity_values = [
+            round(min_value + i * 0.5, 2)
+            for i in range(
+                int(round((max_value - min_value) / 0.5)) + 1
+            )
+        ]
+    else:
+        min_value, max_value = st.slider(
+            "Down payment range (%)",
+            min_value=0,
+            max_value=100,
+            value=(5, 40),
+            step=5
+        )
+        sensitivity_values = list(
+            range(min_value, max_value + 1, 5)
+        )
+
+
 scoring_df = pd.DataFrame(scoring_results)
 # Sort properties by overall score
 scoring_df = scoring_df.sort_values(
