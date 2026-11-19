@@ -27,7 +27,7 @@ from core.sensitivity import calculate_sensitivity
 st.set_page_config(page_title="So Ya Wanna Buy A Home", page_icon="", layout="wide")
 st.title("So Ya Wanna Buy A Home")
 
-# Initialize stored property data
+# Initialize stored property data7
 # OR
 # Store the most recently submitted properties
 if "properties" not in st.session_state:
@@ -381,10 +381,12 @@ st.write(
     "affect the monthly ownership costs of "
     "your selected properties."
 )
-for property_data in properties:
+if st.session_state.properties is not None:
+# for property_data in properties:
     sensitivity_variable = st.selectbox(
         "Choose a financial variable to analyze",
-        options=["Interest Rate", "Down Payment"]
+        options=["Interest Rate", "Down Payment"],
+        # key="sensitivity_variable_selector"
     )
     if sensitivity_variable == "Interest Rate":
         min_value, max_value = st.slider(
@@ -411,7 +413,84 @@ for property_data in properties:
         sensitivity_values = list(
             range(min_value, max_value + 1, 5)
         )
-
+    sensitivity_df = calculate_sensitivity(
+        properties=st.session_state.properties,
+        down_payment=down_payment,
+        interest_rate=interest_rate,
+        loan_years=loan_years,
+        variable=sensitivity_variable,
+        values=sensitivity_values
+    )
+    st.subheader("Sensitivity Results")
+    st.dataframe(
+        sensitivity_df,
+        hide_index=True,
+        width="stretch"
+    )
+    st.subheader("Sensitivity Comparison")
+    fig = px.line(
+        sensitivity_df,
+        x="Value",
+        y="Total Monthly Cost",
+        color="Property",
+        markers=True,
+        title=(
+            "Effect of " + sensitivity_variable +
+            " on Monthly Ownership Costs"
+        ),
+        labels={
+            "Value": (
+                "Interest Rate (%)"
+                if sensitivity_variable == "Interest Rate"
+                else "Down Payment (%)"
+            ),
+            "Total Monthly Cost": "Monthly Cost ($)"
+        }
+    )
+    # Show the buyer's monthly housing budget
+    fig.add_hline(
+        y=monthly_budget,
+        line_dash="dash",
+        annotation_text="Monthly Budget"
+    )
+    st.plotly_chart(
+        fig,
+        width="stretch"
+    )
+    st.subheader("Affordability Across Scenarios")
+    sensitivity_df["Within Budget"] = (
+        sensitivity_df["Total Monthly Cost"] <= monthly_budget
+    )
+    affordability_summary = (
+        sensitivity_df.groupby("Property")["Within Budget"]
+        .agg(
+            Affordability_Scenarios="sum",
+            Total_Scenarios="count"
+        )
+        .reset_index()
+    )
+    affordability_summary["Affordable Percentage"] = (
+        affordability_summary["Affordable_Scenarios"]
+        / affordability_summary["Total Scenarios"]
+        * 100
+    )
+    st.dataframe(
+        affordability_summary,
+        hide_index=True,
+        width="stretch"
+    )
+    fig_affordability = px.bar(
+        affordability_summary,
+        x="Property",
+        y="Affordable Percentage",
+        title="Percentage of Tested Scenarios Within Budget",
+        text="Afforable Percentage"
+    )
+    fig_affordability.update_yaxes(range=[0, 100])
+    st.plotly_chart(
+        fig_affordability,
+        width="stretch"
+    )
 
 scoring_df = pd.DataFrame(scoring_results)
 # Sort properties by overall score
