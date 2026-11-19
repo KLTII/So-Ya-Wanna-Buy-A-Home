@@ -1,5 +1,6 @@
 import pytest
 from core.sensitivity import calculate_sensitivity
+from core.financial import monthly_ownership_cost
 
 @pytest.fixture
 def sample_properties():
@@ -48,6 +49,7 @@ def test_unsupported_variable(sample_properties):
             values=[1, 2, 3]
         )
 def test_baseline_matches_existing_calculation(sample_properties):
+    property_data = sample_properties[0]
     result = calculate_sensitivity(
         properties=sample_properties,
         down_payment=20,
@@ -55,6 +57,19 @@ def test_baseline_matches_existing_calculation(sample_properties):
         loan_years=30,
         variable="Interest Rate",
         values=[6]
+    )
+    expected = monthly_ownership_cost(
+        price=property_data["Price"],
+        down_payment_percent=20,
+        annual_rate=0.06,
+        years=30,
+        annual_property_tax=property_data["Tax"],
+        annual_insurance=property_data["Insurance"],
+        monthly_hoa=property_data["HOA"],
+        monthly_maintenance=property_data["Maintenance"]
+    )
+    assert result.iloc[0]["Total Monthly Cost"] == pytest.approx(
+        expected["Total"]
     )
     # 280,000 loan at 6% over 30 years, plus $850 in monthly non-mortgage costs.
     # Mortgage payment: approximately $1,678.74

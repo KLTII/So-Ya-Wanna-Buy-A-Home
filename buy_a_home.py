@@ -37,7 +37,7 @@ if "properties" not in st.session_state:
 # Property input form
 property_labels = ["Property 1", "Property 2", "Property 3"]
 housing_types = ["Condominium", "Townhome", "Detached House"]
-default_prices = [0, 0, 0]
+default_prices = [350000, 450000, 550000]
 with st.form("property_form"):
     st.header("Enter Property Information")
     # Create 3 columns inside the form
@@ -68,28 +68,28 @@ with st.form("property_form"):
             tax = st.number_input(
                 "Annual property tax ($)",
                 min_value=0.0,
-                value=0.0,
+                value=3600.0,
                 step=100.0,
                 key=f"tax_{i}"
             )
             insurance = st.number_input(
                 "Annual insurance ($)",
                 min_value=0.0,
-                value=0.0,
+                value=1200.0,
                 step=100.0,
                 key=f"insurance_{i}"
             )
             hoa = st.number_input(
                 "Monthly HOA fees ($)",
                 min_value=0.0,
-                value=0.0,
+                value=300.0 if i == 0 else 0.0,
                 step=25.0,
                 key=f"hoa_{i}"
             )
             maintenance = st.number_input(
                 "Monthly maintenance ($)",
                 min_value=0.0,
-                value=0.0,
+                value=150.0,
                 step=25.0,
                 key=f"maintenance_{i}"
             )
@@ -142,7 +142,7 @@ if st.session_state.properties is not None:
             f"${property_data["Price"]:,.2f}"
         )
 else:
-    st.info("Enter property details and click Compare Properties.")
+    st.info("Click \"Compare Properties\" button after entering property details.")
 
 # Property input form
 # with st.form("property_form_former"):
@@ -301,37 +301,6 @@ weights = {
     "Maintenance Ease": maintenance_weight
 }
 
-st.header("Financial Comparison")
-# if st.session_state.properties is not None:
-results = []
-cost_breakdowns = []
-for property_data in properties:
-    # Calculate monthly ownership cost
-    costs = monthly_ownership_cost(
-        price=property_data["Price"],
-        down_payment_percent=down_payment,
-        annual_rate=interest_rate / 100,
-        years=loan_years,
-        annual_property_tax=property_data["Tax"],
-        annual_insurance=property_data["Insurance"],
-        monthly_hoa=property_data["HOA"],
-        monthly_maintenance=property_data["Maintenance"]
-    )
-    results.append({
-        "Property": property_data["Property"],
-        "Housing Type": property_data["Housing Type"],
-        "Purchase Price": property_data["Price"],
-        "Monthly Mortgage": costs["Mortgage"],
-        "Total Monthly Cost": costs["Total"],
-        "Within Budget": costs["Total"] <= monthly_budget
-    })
-    cost_breakdowns.append({
-        "Property": property_data["Property"],
-        **costs
-    })
-    
-
-results_df = pd.DataFrame(results)
 
 if sum(weights.values()) == 0:
     st.warning("Set at least one importance weight above zero.")
@@ -458,19 +427,26 @@ if st.session_state.properties is not None:
         width="stretch"
     )
     st.subheader("Affordability Across Scenarios")
+    # Determine whether each scenario meets the budget
     sensitivity_df["Within Budget"] = (
         sensitivity_df["Total Monthly Cost"] <= monthly_budget
     )
+    # Count affordable and total scenarios
     affordability_summary = (
         sensitivity_df.groupby("Property")["Within Budget"]
         .agg(
-            Affordability_Scenarios="sum",
-            Total_Scenarios="count"
+            **{
+                "Affordable Scenarios": "sum",
+                "Total Scenarios": "count"
+            }
+            # Affordability_Scenarios="sum",
+            # Total_Scenarios="count"
         )
         .reset_index()
     )
+    # Calculate the percentage of affordable scenarios
     affordability_summary["Affordable Percentage"] = (
-        affordability_summary["Affordable_Scenarios"]
+        affordability_summary["Affordable Scenarios"]
         / affordability_summary["Total Scenarios"]
         * 100
     )
@@ -484,7 +460,7 @@ if st.session_state.properties is not None:
         x="Property",
         y="Affordable Percentage",
         title="Percentage of Tested Scenarios Within Budget",
-        text="Afforable Percentage"
+        text="Affordable Percentage"
     )
     fig_affordability.update_yaxes(range=[0, 100])
     st.plotly_chart(
@@ -543,6 +519,37 @@ else:
             f"{best_property['Overall Score']:.1f}/100"
         )
 
+st.header("Financial Comparison")
+# if st.session_state.properties is not None:
+results = []
+cost_breakdowns = []
+for property_data in properties:
+    # Calculate monthly ownership cost
+    costs = monthly_ownership_cost(
+        price=property_data["Price"],
+        down_payment_percent=down_payment,
+        annual_rate=interest_rate / 100,
+        years=loan_years,
+        annual_property_tax=property_data["Tax"],
+        annual_insurance=property_data["Insurance"],
+        monthly_hoa=property_data["HOA"],
+        monthly_maintenance=property_data["Maintenance"]
+    )
+    results.append({
+        "Property": property_data["Property"],
+        "Housing Type": property_data["Housing Type"],
+        "Purchase Price": property_data["Price"],
+        "Monthly Mortgage": costs["Mortgage"],
+        "Total Monthly Cost": costs["Total"],
+        "Within Budget": costs["Total"] <= monthly_budget
+    })
+    cost_breakdowns.append({
+        "Property": property_data["Property"],
+        **costs
+    })
+    
+
+results_df = pd.DataFrame(results)
 costs_df = pd.DataFrame(cost_breakdowns)
 
 summary_columns = st.columns(3)
