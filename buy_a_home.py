@@ -93,6 +93,48 @@ with st.form("property_form"):
                 step=25.0,
                 key=f"maintenance_{i}"
             )
+#     downPayment1 = st.text_input("Enter the down payment amount")
+#     closingCosts1 = st.text_input("Enter the closing costs")
+#     electricity1 = st.text_input("Enter the monthly cost for electricity")
+            electricity = st.number_input(
+                "Electricity ($)",
+                min_value=0.0,
+                value=100.0,
+                step=10.0,
+                key=f"electricity_{i}"
+            )
+#     water1 = st.text_input("Enter the monthly cost for water")
+            water = st.number_input(
+                "Water ($)",
+                min_value=0.0,
+                value=50.0,
+                step=10.0,
+                key=f"water_{i}"
+            )
+#     sewer1 = st.text_input("Enter the monthly cost for sewer")
+            sewage = st.number_input(
+                "Sewage ($)",
+                min_value=0.0,
+                value=50.0,
+                step=10.0,
+                key=f"sewage_{i}"
+            )
+#     garbage1 = st.text_input("Enter the monthly cost for garbage")
+            garbage = st.number_input(
+                "Garbage ($)",
+                min_value=0.0,
+                value=25.0,
+                step=5.0,
+                key=f"garbage_{i}"
+            )
+#     gas1 = st.text_input("Enter the monthly cost for gas")
+            gas = st.number_input(
+                "Gas ($)",
+                min_value=0.0,
+                value=20.0,
+                step=5.0,
+                key=f"gas_{i}"
+            )
             square_feet = st.number_input(
                 "Living area (square feet)",
                 min_value=1,
@@ -629,12 +671,12 @@ else:
         f"${cheapest['Total Monthly Cost']:,.2f}."
     )
 
-# st.info(
-#     "These estimates exclude PMI, utilities, closing costs, "
-#     "and other potential ownership expenses. "
-#     "The lowest cost property is not necessarily the best "
-#     "overall choice."
-# )
+st.info(
+    "These estimates exclude PMI (private mortgage insurance), "
+    "closing costs, and other potential ownership expenses.  "
+    "The lowest cost property is not necessarily the best "
+    "overall choice."
+)
 
 # form1.header("3 options to choose from")
 # home1 = form1.text_input("Enter the 1st property you're interested in")
