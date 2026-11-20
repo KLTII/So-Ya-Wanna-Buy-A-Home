@@ -24,28 +24,53 @@ from core.scoring import (
 )
 from core.sensitivity import calculate_sensitivity
 
-st.set_page_config(page_title="So Ya Wanna Buy A Home", page_icon="", layout="wide")
+st.set_page_config(page_title="So Ya Wanna Buy A Home", page_icon="", layout="wide", initial_sidebar_state="expanded")
 st.title("So Ya Wanna Buy A Home")
+st.write("Compare 2 or more properties based on their estimated monthly ownership costs.")
 
-# Initialize stored property data7
+# Initialize stored property data
 # OR
 # Store the most recently submitted properties
 if "properties" not in st.session_state:
     st.session_state.properties = None
 
-
+# Determine which submitted properties are active
 # Property input form
 property_labels = ["Property 1", "Property 2", "Property 3"]
 housing_types = ["Condominium", "Townhome", "Detached House"]
 default_prices = [350000, 450000, 550000]
+# include_third_party = st.checkbox(
+#     "Compare a third property",
+#     value=False,
+#     key="include_third_property"
+# )
+# if (
+#     st.session_state.properties is not None
+#     and len(st.session_state.properties)
+#     != (3 if include_third_party else 2)
+# ):
+#     st.session_state.properties = None
+# # Determine how many properties to compare/display
+# num_properties = 3 if include_third_party else 2
 with st.form("property_form"):
     st.header("Enter Property Information")
-    # Create 3 columns inside the form
+    # Create 2 or more columns inside the form
     columns = st.columns(3)
     properties = []
+    # for i in range(num_properties):
     for i, property_label in enumerate(property_labels):
         with columns[i]:
+            # property_label = property_labels[i]
             st.subheader(property_label)
+            if i == 2:
+                include_property = st.checkbox(
+                    "Include Property 3 in Comparison",
+                    value=False,
+                    key="include_property_3"
+                )
+            else:
+                include_property = True
+            
             listing_url = st.text_input(
                 "Property listing URL",
                 placeholder="Paste a listing URL",
@@ -95,7 +120,7 @@ with st.form("property_form"):
             )
 #     downPayment1 = st.text_input("Enter the down payment amount")
 #     closingCosts1 = st.text_input("Enter the closing costs")
-#     electricity1 = st.text_input("Enter the monthly cost for electricity")
+            # Utilities are either optional or conditional on HOA configuration
             electricity = st.number_input(
                 "Electricity ($)",
                 min_value=0.0,
@@ -103,7 +128,6 @@ with st.form("property_form"):
                 step=10.0,
                 key=f"electricity_{i}"
             )
-#     water1 = st.text_input("Enter the monthly cost for water")
             water = st.number_input(
                 "Water ($)",
                 min_value=0.0,
@@ -111,7 +135,6 @@ with st.form("property_form"):
                 step=10.0,
                 key=f"water_{i}"
             )
-#     sewer1 = st.text_input("Enter the monthly cost for sewer")
             sewage = st.number_input(
                 "Sewage ($)",
                 min_value=0.0,
@@ -119,7 +142,6 @@ with st.form("property_form"):
                 step=10.0,
                 key=f"sewage_{i}"
             )
-#     garbage1 = st.text_input("Enter the monthly cost for garbage")
             garbage = st.number_input(
                 "Garbage ($)",
                 min_value=0.0,
@@ -127,7 +149,6 @@ with st.form("property_form"):
                 step=5.0,
                 key=f"garbage_{i}"
             )
-#     gas1 = st.text_input("Enter the monthly cost for gas")
             gas = st.number_input(
                 "Gas ($)",
                 min_value=0.0,
@@ -135,6 +156,8 @@ with st.form("property_form"):
                 step=5.0,
                 key=f"gas_{i}"
             )
+            # Should I have a space for internet
+            # Buyer preference scoring inputs
             square_feet = st.number_input(
                 "Living area (square feet)",
                 min_value=1,
@@ -168,7 +191,8 @@ with st.form("property_form"):
                 "Maintenance": maintenance,
                 "Square Feet": square_feet,
                 "Privacy": privacy,
-                "Maintenance Ease": maintenance_ease
+                "Maintenance Ease": maintenance_ease,
+                "Included": include_property,
             })
     # One button submits all 3 columns
     submitted = st.form_submit_button("Compare Properties")
@@ -176,15 +200,30 @@ with st.form("property_form"):
 if submitted:
     st.session_state.properties = properties
 # Work with the submitted information, and display submitted property data
+active_properties = []
 if st.session_state.properties is not None:
-    st.subheader("Submitted Properties")
-    for property_data in st.session_state.properties:
-        st.write(
-            property_data["Property"],
-            f"${property_data["Price"]:,.2f}"
+    # st.subheader("Submitted Properties")
+    # for property_data in st.session_state.properties:
+    active_properties = [
+        property_data
+        for property_data in st.session_state.properties
+        if (
+            property_data["Property"] != "Property 3"
+            or property_data.get("Included", False)
         )
-else:
+    #   if property_data.get("Included", True)
+    ]
+    #   st.write(
+    #         property_data["Property"],
+    #         f"${property_data["Price"]:,.2f}"
+    #   )
     st.info("Click \"Compare Properties\" button after entering property details.")
+elif len(active_properties) == 2:
+    st.info("Comparing Properties 1 and 2.  Property 3 is currently excluded.")
+elif len(active_properties) == 3:
+    st.info("Comparing all 3 properties.")
+
+# if st.session_state.properties is not None:
 
 # Property input form
 # with st.form("property_form_former"):
@@ -268,7 +307,6 @@ else:
 #         )
 
 # Beginning of non-form format
-st.write("Compare 3 properties based on their estimated monthly ownership costs.")
 
 st.sidebar.header("Buyer Information")
 down_payment = st.sidebar.slider(
@@ -348,9 +386,11 @@ if sum(weights.values()) == 0:
     st.warning("Set at least one importance weight above zero.")
     st.stop()
 
-st.header("Buyer Preference Scoring")
-scoring_results = []
-for property_data in properties:
+st.header("Financial Comparison")
+# if st.session_state.properties is not None:
+results = []
+cost_breakdowns = []
+for property_data in active_properties:
     # Calculate monthly ownership cost
     costs = monthly_ownership_cost(
         price=property_data["Price"],
@@ -362,29 +402,71 @@ for property_data in properties:
         monthly_hoa=property_data["HOA"],
         monthly_maintenance=property_data["Maintenance"]
     )
-    # Calculate criterion scores
-    scores = {
-        "Affordability": affordability_score(
-            costs["Total"],
-            monthly_budget
-        ),
-        "Living Space": space_score(
-            property_data["Square Feet"],
-            desired_square_feet
-        ),
-        "Privacy": property_data["Privacy"] * 10,
-        "Maintenance Ease": (property_data["Maintenance Ease"] * 10)
-    }
-    # Calculate weighted total
-    total_score = weighted_score(scores, weights)
-    scoring_results.append({
+    results.append({
         "Property": property_data["Property"],
         "Housing Type": property_data["Housing Type"],
-        "Monthly Cost": costs["Total"],
-        "Within Budget": costs["Total"] <= monthly_budget,
-        ** scores,
-        "Overall Score": total_score
+        "Purchase Price": property_data["Price"],
+        "Monthly Mortgage": costs["Mortgage"],
+        "Total Monthly Cost": costs["Total"],
+        "Within Budget": costs["Total"] <= monthly_budget
     })
+    cost_breakdowns.append({
+        "Property": property_data["Property"],
+        **costs
+    })
+    
+
+results_df = pd.DataFrame(results)
+costs_df = pd.DataFrame(cost_breakdowns)
+
+summary_columns = st.columns(3)
+for i, result in enumerate(results):
+    with summary_columns[i]:
+        st.metric(
+            label=(
+                f"{result["Property"]} "
+                f"({result["Housing Type"]})"
+            ),
+            value=f"${result['Total Monthly Cost']:,.2f}",
+            delta=(
+                "Within budget"
+                if result["Within Budget"]
+                else "Over budget"
+            ),
+            delta_color="off",
+            delta_arrow="off"
+        )
+
+st.subheader("Monthly Cost Breakdown")
+chart_data = costs_df.melt(
+    id_vars="Property",
+    value_vars=[
+        "Mortgage",
+        "Property tax",
+        "Insurance",
+        "HOA",
+        "Maintenance"
+    ],
+    var_name="Expense",
+    value_name="Monthly Cost"
+)
+fig = px.bar(
+    chart_data,
+    x="Property",
+    y="Monthly Cost",
+    color="Expense",
+    barmode="stack",
+    title="Estimated Monthly Ownership Costs"
+)
+fig.update_layout(
+    yaxis_title = "Monthly Cost ($)",
+    xaxis_title = "Housing Type"
+)
+st.plotly_chart(
+    fig,
+    width="stretch"
+)
+
 
 st.header("Financial Sensitivity Analysis")
 st.write(
@@ -425,7 +507,7 @@ if st.session_state.properties is not None:
             range(min_value, max_value + 1, 5)
         )
     sensitivity_df = calculate_sensitivity(
-        properties=st.session_state.properties,
+        properties=active_properties,
         down_payment=down_payment,
         interest_rate=interest_rate,
         loan_years=loan_years,
@@ -510,6 +592,44 @@ if st.session_state.properties is not None:
         width="stretch"
     )
 
+st.header("Buyer Preference Scoring")
+scoring_results = []
+for property_data in active_properties:
+    # Calculate monthly ownership cost
+    costs = monthly_ownership_cost(
+        price=property_data["Price"],
+        down_payment_percent=down_payment,
+        annual_rate=interest_rate / 100,
+        years=loan_years,
+        annual_property_tax=property_data["Tax"],
+        annual_insurance=property_data["Insurance"],
+        monthly_hoa=property_data["HOA"],
+        monthly_maintenance=property_data["Maintenance"]
+    )
+    # Calculate criterion scores
+    scores = {
+        "Affordability": affordability_score(
+            costs["Total"],
+            monthly_budget
+        ),
+        "Living Space": space_score(
+            property_data["Square Feet"],
+            desired_square_feet
+        ),
+        "Privacy": property_data["Privacy"] * 10,
+        "Maintenance Ease": (property_data["Maintenance Ease"] * 10)
+    }
+    # Calculate weighted total
+    total_score = weighted_score(scores, weights)
+    scoring_results.append({
+        "Property": property_data["Property"],
+        "Housing Type": property_data["Housing Type"],
+        "Monthly Cost": costs["Total"],
+        "Within Budget": costs["Total"] <= monthly_budget,
+        ** scores,
+        "Overall Score": total_score
+    })
+
 scoring_df = pd.DataFrame(scoring_results)
 # Sort properties by overall score
 scoring_df = scoring_df.sort_values(
@@ -561,55 +681,6 @@ else:
             f"{best_property['Overall Score']:.1f}/100"
         )
 
-st.header("Financial Comparison")
-# if st.session_state.properties is not None:
-results = []
-cost_breakdowns = []
-for property_data in properties:
-    # Calculate monthly ownership cost
-    costs = monthly_ownership_cost(
-        price=property_data["Price"],
-        down_payment_percent=down_payment,
-        annual_rate=interest_rate / 100,
-        years=loan_years,
-        annual_property_tax=property_data["Tax"],
-        annual_insurance=property_data["Insurance"],
-        monthly_hoa=property_data["HOA"],
-        monthly_maintenance=property_data["Maintenance"]
-    )
-    results.append({
-        "Property": property_data["Property"],
-        "Housing Type": property_data["Housing Type"],
-        "Purchase Price": property_data["Price"],
-        "Monthly Mortgage": costs["Mortgage"],
-        "Total Monthly Cost": costs["Total"],
-        "Within Budget": costs["Total"] <= monthly_budget
-    })
-    cost_breakdowns.append({
-        "Property": property_data["Property"],
-        **costs
-    })
-    
-
-results_df = pd.DataFrame(results)
-costs_df = pd.DataFrame(cost_breakdowns)
-
-summary_columns = st.columns(3)
-for i, result in enumerate(results):
-    with summary_columns[i]:
-        st.metric(
-            label=(
-                f"{result["Property"]} "
-                f"({result["Housing Type"]})"
-            ),
-            value=f"${result['Total Monthly Cost']:,.2f}",
-            delta=(
-                "Within budget"
-                if result["Within Budget"]
-                else "Over budget"
-            ),
-            delta_color="off"
-        )
 
 st.subheader("Property Comparison Table")
 st.dataframe(
@@ -618,39 +689,6 @@ st.dataframe(
     width="stretch"
 )
 
-st.subheader("Monthly Cost Breakdown")
-
-chart_data = costs_df.melt(
-    id_vars="Property",
-    value_vars=[
-        "Mortgage",
-        "Property tax",
-        "Insurance",
-        "HOA",
-        "Maintenance"
-    ],
-    var_name="Expense",
-    value_name="Monthly Cost"
-)
-
-fig = px.bar(
-    chart_data,
-    x="Property",
-    y="Monthly Cost",
-    color="Expense",
-    barmode="stack",
-    title="Estimated Monthly Ownership Costs"
-)
-
-fig.update_layout(
-    yaxis_title = "Monthly Cost ($)",
-    xaxis_title = "Housing Type"
-)
-
-st.plotly_chart(
-    fig,
-    width="stretch"
-)
 
 st.header("Decision Guidance")
 
