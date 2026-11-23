@@ -34,8 +34,88 @@ st.write("Compare 2 or more properties based on their estimated monthly ownershi
 if "properties" not in st.session_state:
     st.session_state.properties = None
 
-# Determine which submitted properties are active
-# Property input form
+#####################################################################
+#                                                                   #
+#                           SIDEBAR                                 #
+#                                                                   #
+#####################################################################
+st.sidebar.header("Buyer Information")
+down_payment = st.sidebar.slider(
+    "Down payment (%)",
+    min_value=0,
+    max_value=100,
+    value=20,
+    step=5
+)
+interest_rate = st.sidebar.number_input(
+    "Annual interest rate (%)",
+    min_value=0.0,
+    max_value=25.0,
+    value=6.5,
+    step=0.25
+)
+loan_years = st.sidebar.selectbox(
+    "Mortgage term (years)",
+    options=[10, 15, 20, 25, 30],
+    index=4
+)
+# loan_years = st.sidebar.number_input(
+#     "Mortgage term (years)",
+#     min_value=0,
+#     max_value=30,
+#     value=30,
+#     step=1
+# )
+monthly_budget = st.sidebar.number_input(
+    "Maximum monthly housing budget ($)",
+    min_value=0.0,
+    value=3500.0,
+    step=100.0
+)
+
+st.sidebar.header("Buyer Preferences")
+desired_square_feet = st.sidebar.number_input(
+    "Desired living area (sq ft)",
+    min_value=100,
+    value=1800,
+    step=100
+)
+st.sidebar.subheader("Importance Weights")
+affordability_weight = st.sidebar.slider(
+    "Affordability importance",
+    min_value=0,
+    max_value=10,
+    value=5
+)
+space_weight = st.sidebar.slider(
+    "Living space importance",
+    min_value=0,
+    max_value=10,
+    value=5
+)
+privacy_weight = st.sidebar.slider(
+    "Privacy importance",
+    min_value=0,
+    max_value=10,
+    value=5
+)
+maintenance_weight = st.sidebar.slider(
+    "Maintenance ease importance",
+    min_value=0,
+    max_value=10,
+    value=5
+)
+weights = {
+    "Affordability": affordability_weight,
+    "Living Space": space_weight,
+    "Privacy": privacy_weight,
+    "Maintenance Ease": maintenance_weight
+}
+#####################################################################
+#                                                                   #
+#                       Property input form                         #
+#                                                                   #
+#####################################################################
 property_labels = ["Property 1", "Property 2", "Property 3"]
 housing_types = ["Condominium", "Townhome", "Detached House"]
 default_prices = [350000, 450000, 550000]
@@ -194,12 +274,13 @@ with st.form("property_form"):
                 "Maintenance Ease": maintenance_ease,
                 "Included": include_property,
             })
-    # One button submits all 3 columns
+    # One button submits all columns
     submitted = st.form_submit_button("Compare Properties")
     # Save the submitted dictionaries, only when submitted
 if submitted:
     st.session_state.properties = properties
 # Work with the submitted information, and display submitted property data
+# Determine which submitted properties are active
 active_properties = []
 if st.session_state.properties is not None:
     # st.subheader("Submitted Properties")
@@ -308,413 +389,386 @@ elif len(active_properties) == 3:
 
 # Beginning of non-form format
 
-st.sidebar.header("Buyer Information")
-down_payment = st.sidebar.slider(
-    "Down payment (%)",
-    min_value=0,
-    max_value=100,
-    value=20,
-    step=5
-)
-interest_rate = st.sidebar.number_input(
-    "Annual interest rate (%)",
-    min_value=0.0,
-    max_value=25.0,
-    value=6.5,
-    step=0.25
-)
-loan_years = st.sidebar.selectbox(
-    "Mortgage term (years)",
-    options=[10, 15, 20, 25, 30],
-    index=4
-)
-# loan_years = st.sidebar.number_input(
-#     "Mortgage term (years)",
-#     min_value=0,
-#     max_value=30,
-#     value=30,
-#     step=1
-# )
-monthly_budget = st.sidebar.number_input(
-    "Maximum monthly housing budget ($)",
-    min_value=0.0,
-    value=3500.0,
-    step=100.0
-)
-
-st.sidebar.header("Buyer Preferences")
-desired_square_feet = st.sidebar.number_input(
-    "Desired living area (sq ft)",
-    min_value=100,
-    value=1800,
-    step=100
-)
-st.sidebar.subheader("Importance Weights")
-affordability_weight = st.sidebar.slider(
-    "Affordability importance",
-    min_value=0,
-    max_value=10,
-    value=5
-)
-space_weight = st.sidebar.slider(
-    "Living space importance",
-    min_value=0,
-    max_value=10,
-    value=5
-)
-privacy_weight = st.sidebar.slider(
-    "Privacy importance",
-    min_value=0,
-    max_value=10,
-    value=5
-)
-maintenance_weight = st.sidebar.slider(
-    "Maintenance ease importance",
-    min_value=0,
-    max_value=10,
-    value=5
-)
-weights = {
-    "Affordability": affordability_weight,
-    "Living Space": space_weight,
-    "Privacy": privacy_weight,
-    "Maintenance Ease": maintenance_weight
-}
-
 
 if sum(weights.values()) == 0:
     st.warning("Set at least one importance weight above zero.")
     st.stop()
 
-st.header("Financial Comparison")
-# if st.session_state.properties is not None:
-results = []
-cost_breakdowns = []
-for property_data in active_properties:
-    # Calculate monthly ownership cost
-    costs = monthly_ownership_cost(
-        price=property_data["Price"],
-        down_payment_percent=down_payment,
-        annual_rate=interest_rate / 100,
-        years=loan_years,
-        annual_property_tax=property_data["Tax"],
-        annual_insurance=property_data["Insurance"],
-        monthly_hoa=property_data["HOA"],
-        monthly_maintenance=property_data["Maintenance"]
-    )
-    results.append({
-        "Property": property_data["Property"],
-        "Housing Type": property_data["Housing Type"],
-        "Purchase Price": property_data["Price"],
-        "Monthly Mortgage": costs["Mortgage"],
-        "Total Monthly Cost": costs["Total"],
-        "Within Budget": costs["Total"] <= monthly_budget
-    })
-    cost_breakdowns.append({
-        "Property": property_data["Property"],
-        **costs
-    })
-    
-
-results_df = pd.DataFrame(results)
-costs_df = pd.DataFrame(cost_breakdowns)
-
-summary_columns = st.columns(3)
-for i, result in enumerate(results):
-    with summary_columns[i]:
-        st.metric(
-            label=(
-                f"{result["Property"]} "
-                f"({result["Housing Type"]})"
-            ),
-            value=f"${result['Total Monthly Cost']:,.2f}",
-            delta=(
-                "Within budget"
-                if result["Within Budget"]
-                else "Over budget"
-            ),
-            delta_color="off",
-            delta_arrow="off"
-        )
-
-st.subheader("Monthly Cost Breakdown")
-chart_data = costs_df.melt(
-    id_vars="Property",
-    value_vars=[
-        "Mortgage",
-        "Property tax",
-        "Insurance",
-        "HOA",
-        "Maintenance"
-    ],
-    var_name="Expense",
-    value_name="Monthly Cost"
-)
-fig = px.bar(
-    chart_data,
-    x="Property",
-    y="Monthly Cost",
-    color="Expense",
-    barmode="stack",
-    title="Estimated Monthly Ownership Costs"
-)
-fig.update_layout(
-    yaxis_title = "Monthly Cost ($)",
-    xaxis_title = "Housing Type"
-)
-st.plotly_chart(
-    fig,
-    width="stretch"
-)
-
-
-st.header("Financial Sensitivity Analysis")
-st.write(
-    "Explore how changing financial assumptions "
-    "affect the monthly ownership costs of "
-    "your selected properties."
-)
+#####################################################################
+#                                                                   #
+#                       Financial Comparison                        #
+#                                                                   #
+#####################################################################
 if st.session_state.properties is not None:
-# for property_data in properties:
-    sensitivity_variable = st.selectbox(
-        "Choose a financial variable to analyze",
-        options=["Interest Rate", "Down Payment"],
-        # key="sensitivity_variable_selector"
-    )
-    if sensitivity_variable == "Interest Rate":
-        min_value, max_value = st.slider(
-            "Interest rate change (%)",
-            min_value=0.0,
-            max_value=15.0,
-            value=(4.0, 9.0),
-            step=0.5
+    st.header("Financial Comparison")
+    # if st.session_state.properties is not None:
+    results = []
+    cost_breakdowns = []
+    for property_data in active_properties:
+        # Calculate monthly ownership cost
+        costs = monthly_ownership_cost(
+            price=property_data["Price"],
+            down_payment_percent=down_payment,
+            annual_rate=interest_rate / 100,
+            years=loan_years,
+            annual_property_tax=property_data["Tax"],
+            annual_insurance=property_data["Insurance"],
+            monthly_hoa=property_data["HOA"],
+            monthly_maintenance=property_data["Maintenance"]
         )
-        sensitivity_values = [
-            round(min_value + i * 0.5, 2)
-            for i in range(
-                int(round((max_value - min_value) / 0.5)) + 1
+        results.append({
+            "Property": property_data["Property"],
+            "Housing Type": property_data["Housing Type"],
+            "Purchase Price": property_data["Price"],
+            "Monthly Mortgage": costs["Mortgage"],
+            "Total Monthly Cost": costs["Total"],
+            "Within Budget": costs["Total"] <= monthly_budget
+        })
+        cost_breakdowns.append({
+            "Property": property_data["Property"],
+            **costs
+        })
+        
+
+    results_df = pd.DataFrame(results)
+
+    summary_columns = st.columns(3)
+    for i, result in enumerate(results):
+        with summary_columns[i]:
+            st.metric(
+                label=(
+                    f"{result["Property"]} "
+                    f"({result["Housing Type"]})"
+                ),
+                value=f"${result['Total Monthly Cost']:,.2f}",
+                delta=(
+                    "Within budget"
+                    if result["Within Budget"]
+                    else "Over budget"
+                ),
+                delta_color="off",
+                delta_arrow="off"
             )
-        ]
-    else:
-        min_value, max_value = st.slider(
-            "Down payment range (%)",
-            min_value=0,
-            max_value=100,
-            value=(5, 40),
-            step=5
+
+#####################################################################
+#                                                                   #
+#                     Monthly Cost Breakdown                        #
+#                                                                   #
+#####################################################################
+    st.subheader("Monthly Cost Breakdown")
+    costs_df = pd.DataFrame(cost_breakdowns)
+    if not costs_df.empty:
+        chart_data = costs_df.melt(
+            id_vars="Property",
+            value_vars=[
+                "Mortgage",
+                "Property tax",
+                "Insurance",
+                "HOA",
+                "Maintenance"
+            ],
+            var_name="Expense",
+            value_name="Monthly Cost"
         )
-        sensitivity_values = list(
-            range(min_value, max_value + 1, 5)
+        fig = px.bar(
+            chart_data,
+            x="Property",
+            y="Monthly Cost",
+            color="Expense",
+            barmode="stack",
+            title="Estimated Monthly Ownership Costs"
         )
-    sensitivity_df = calculate_sensitivity(
-        properties=active_properties,
-        down_payment=down_payment,
-        interest_rate=interest_rate,
-        loan_years=loan_years,
-        variable=sensitivity_variable,
-        values=sensitivity_values
-    )
-    st.subheader("Sensitivity Results")
-    st.dataframe(
-        sensitivity_df,
-        hide_index=True,
-        width="stretch"
-    )
-    st.subheader("Sensitivity Comparison")
-    fig = px.line(
-        sensitivity_df,
-        x="Value",
-        y="Total Monthly Cost",
-        color="Property",
-        markers=True,
-        title=(
-            "Effect of " + sensitivity_variable +
-            " on Monthly Ownership Costs"
-        ),
-        labels={
-            "Value": (
-                "Interest Rate (%)"
-                if sensitivity_variable == "Interest Rate"
-                else "Down Payment (%)"
+        fig.update_layout(
+            yaxis_title = "Monthly Cost ($)",
+            xaxis_title = "Housing Type"
+        )
+        st.plotly_chart(
+            fig,
+            width="stretch"
+        )
+
+
+#####################################################################
+#                                                                   #
+#                  Buyer Preference Scoring                         #
+#                                                                   #
+#####################################################################
+    st.header("Buyer Preference Scoring")
+    scoring_results = []
+    for property_data in active_properties:
+        # Calculate monthly ownership cost
+        costs = monthly_ownership_cost(
+            price=property_data["Price"],
+            down_payment_percent=down_payment,
+            annual_rate=interest_rate / 100,
+            years=loan_years,
+            annual_property_tax=property_data["Tax"],
+            annual_insurance=property_data["Insurance"],
+            monthly_hoa=property_data["HOA"],
+            monthly_maintenance=property_data["Maintenance"]
+        )
+        # Calculate criterion scores
+        scores = {
+            "Affordability": affordability_score(
+                costs["Total"],
+                monthly_budget
             ),
-            "Total Monthly Cost": "Monthly Cost ($)"
+            "Living Space": space_score(
+                property_data["Square Feet"],
+                desired_square_feet
+            ),
+            "Privacy": property_data["Privacy"] * 10,
+            "Maintenance Ease": (property_data["Maintenance Ease"] * 10)
         }
-    )
-    # Show the buyer's monthly housing budget
-    fig.add_hline(
-        y=monthly_budget,
-        line_dash="dash",
-        annotation_text="Monthly Budget"
-    )
-    st.plotly_chart(
-        fig,
-        width="stretch"
-    )
-    st.subheader("Affordability Across Scenarios")
-    # Determine whether each scenario meets the budget
-    sensitivity_df["Within Budget"] = (
-        sensitivity_df["Total Monthly Cost"] <= monthly_budget
-    )
-    # Count affordable and total scenarios
-    affordability_summary = (
-        sensitivity_df.groupby("Property")["Within Budget"]
-        .agg(
-            **{
-                "Affordable Scenarios": "sum",
-                "Total Scenarios": "count"
-            }
-            # Affordability_Scenarios="sum",
-            # Total_Scenarios="count"
+        # Calculate weighted total
+        total_score = weighted_score(scores, weights)
+        scoring_results.append({
+            "Property": property_data["Property"],
+            "Housing Type": property_data["Housing Type"],
+            "Monthly Cost": costs["Total"],
+            "Within Budget": costs["Total"] <= monthly_budget,
+            ** scores,
+            "Overall Score": total_score
+        })
+
+    scoring_df = pd.DataFrame(scoring_results)
+    if not scoring_df.empty:
+    # Sort properties by overall score
+        scoring_df = scoring_df.sort_values(
+            by="Overall Score",
+            ascending=False
         )
-        .reset_index()
+        st.dataframe(
+            scoring_df,
+            hide_index=True,
+            width="stretch"
+        )
+    # Temporary measure, may not need it    
+    # st.write("Scoring columns:", scoring_df.columns.tolist())
+
+#####################################################################
+#                                                                   #
+#                 Financial Sensitivity Analysis                    #
+#                                                                   #
+#####################################################################
+    st.header("Financial Sensitivity Analysis")
+    st.write(
+        "Explore how changing financial assumptions "
+        "affect the monthly ownership costs of "
+        "your selected properties."
     )
-    # Calculate the percentage of affordable scenarios
-    affordability_summary["Affordable Percentage"] = (
-        affordability_summary["Affordable Scenarios"]
-        / affordability_summary["Total Scenarios"]
-        * 100
+    if st.session_state.properties is not None:
+    # for property_data in properties:
+        sensitivity_variable = st.selectbox(
+            "Choose a financial variable to analyze",
+            options=["Interest Rate", "Down Payment"],
+            # key="sensitivity_variable_selector"
+        )
+        if sensitivity_variable == "Interest Rate":
+            min_value, max_value = st.slider(
+                "Interest rate change (%)",
+                min_value=0.0,
+                max_value=15.0,
+                value=(4.0, 9.0),
+                step=0.5
+            )
+            sensitivity_values = [
+                round(min_value + i * 0.5, 2)
+                for i in range(
+                    int(round((max_value - min_value) / 0.5)) + 1
+                )
+            ]
+        else:
+            min_value, max_value = st.slider(
+                "Down payment range (%)",
+                min_value=0,
+                max_value=100,
+                value=(5, 40),
+                step=5
+            )
+            sensitivity_values = list(
+                range(min_value, max_value + 1, 5)
+            )
+        sensitivity_df = calculate_sensitivity(
+            properties=active_properties,
+            down_payment=down_payment,
+            interest_rate=interest_rate,
+            loan_years=loan_years,
+            variable=sensitivity_variable,
+            values=sensitivity_values
+        )
+        st.subheader("Sensitivity Results")
+        st.dataframe(
+            sensitivity_df,
+            hide_index=True,
+            width="stretch"
+        )
+        st.subheader("Sensitivity Comparison")
+        fig = px.line(
+            sensitivity_df,
+            x="Value",
+            y="Total Monthly Cost",
+            color="Property",
+            markers=True,
+            title=(
+                "Effect of " + sensitivity_variable +
+                " on Monthly Ownership Costs"
+            ),
+            labels={
+                "Value": (
+                    "Interest Rate (%)"
+                    if sensitivity_variable == "Interest Rate"
+                    else "Down Payment (%)"
+                ),
+                "Total Monthly Cost": "Monthly Cost ($)"
+            }
+        )
+        # Show the buyer's monthly housing budget
+        fig.add_hline(
+            y=monthly_budget,
+            line_dash="dash",
+            annotation_text="Monthly Budget"
+        )
+        st.plotly_chart(
+            fig,
+            width="stretch"
+        )
+        st.subheader("Affordability Across Scenarios")
+        # Determine whether each scenario meets the budget
+        sensitivity_df["Within Budget"] = (
+            sensitivity_df["Total Monthly Cost"] <= monthly_budget
+        )
+        # Count affordable and total scenarios
+        affordability_summary = (
+            sensitivity_df.groupby("Property")["Within Budget"]
+            .agg(
+                **{
+                    "Affordable Scenarios": "sum",
+                    "Total Scenarios": "count"
+                }
+                # Affordability_Scenarios="sum",
+                # Total_Scenarios="count"
+            )
+            .reset_index()
+        )
+        # Calculate the percentage of affordable scenarios
+        affordability_summary["Affordable Percentage"] = (
+            affordability_summary["Affordable Scenarios"]
+            / affordability_summary["Total Scenarios"]
+            * 100
+        )
+        st.dataframe(
+            affordability_summary,
+            hide_index=True,
+            width="stretch"
+        )
+        fig_affordability = px.bar(
+            affordability_summary,
+            x="Property",
+            y="Affordable Percentage",
+            title="Percentage of Tested Scenarios Within Budget",
+            text="Affordable Percentage"
+        )
+        fig_affordability.update_yaxes(range=[0, 100])
+        st.plotly_chart(
+            fig_affordability,
+            width="stretch"
+        )
+
+
+#####################################################################
+#                                                                   #
+#                    Overall Property Scores                        #
+#                                                                   #
+#####################################################################
+    st.subheader("Overall Property Scores")
+    fig = px.bar(
+        scoring_df,
+        x="Property",
+        y="Overall Score",
+        color="Housing Type",
+        text="Overall Score",
+        title="Weighted Property Comparison"
     )
+    fig.update_traces(
+        texttemplate="%{text:.1f}",
+        textposition="outside"
+    )
+    fig.update_yaxes(range=[0, 110])
+    st.plotly_chart(fig, width="stretch")
+
+#####################################################################
+#                                                                   #
+#                     Property Recommendation                       #
+#                                                                   #
+#####################################################################
+    st.subheader("Property Recommendation")
+    if sum(weights.values()) == 0:
+        st.warning(
+            "Select at least one importance weight above zero."
+        )
+    else:
+        affordability_properties = scoring_df[scoring_df["Within Budget"]]
+        if affordability_properties.empty:
+            st.warning(
+                "None of the properties meet your monthly budget. "
+                "Review your options before making a decision."
+            )
+        else:
+            best_property = affordability_properties.iloc[0]
+            st.success(
+                f"Based on your preferences, "
+                f"{best_property['Property']} "
+                f"({best_property['Housing Type']}) "
+                f"is your highest scoring property within budget, "
+                f"with a score of "
+                f"{best_property['Overall Score']:.1f}/100"
+            )
+
+
+#####################################################################
+#                                                                   #
+#                    Property Comparison Table                      #
+#                                                                   #
+#####################################################################
+    st.subheader("Property Comparison Table")
     st.dataframe(
-        affordability_summary,
+        results_df,
         hide_index=True,
         width="stretch"
     )
-    fig_affordability = px.bar(
-        affordability_summary,
-        x="Property",
-        y="Affordable Percentage",
-        title="Percentage of Tested Scenarios Within Budget",
-        text="Affordable Percentage"
-    )
-    fig_affordability.update_yaxes(range=[0, 100])
-    st.plotly_chart(
-        fig_affordability,
-        width="stretch"
-    )
-
-st.header("Buyer Preference Scoring")
-scoring_results = []
-for property_data in active_properties:
-    # Calculate monthly ownership cost
-    costs = monthly_ownership_cost(
-        price=property_data["Price"],
-        down_payment_percent=down_payment,
-        annual_rate=interest_rate / 100,
-        years=loan_years,
-        annual_property_tax=property_data["Tax"],
-        annual_insurance=property_data["Insurance"],
-        monthly_hoa=property_data["HOA"],
-        monthly_maintenance=property_data["Maintenance"]
-    )
-    # Calculate criterion scores
-    scores = {
-        "Affordability": affordability_score(
-            costs["Total"],
-            monthly_budget
-        ),
-        "Living Space": space_score(
-            property_data["Square Feet"],
-            desired_square_feet
-        ),
-        "Privacy": property_data["Privacy"] * 10,
-        "Maintenance Ease": (property_data["Maintenance Ease"] * 10)
-    }
-    # Calculate weighted total
-    total_score = weighted_score(scores, weights)
-    scoring_results.append({
-        "Property": property_data["Property"],
-        "Housing Type": property_data["Housing Type"],
-        "Monthly Cost": costs["Total"],
-        "Within Budget": costs["Total"] <= monthly_budget,
-        ** scores,
-        "Overall Score": total_score
-    })
-
-scoring_df = pd.DataFrame(scoring_results)
-# Sort properties by overall score
-scoring_df = scoring_df.sort_values(
-    by="Overall Score",
-    ascending=False
-)
-st.dataframe(
-    scoring_df,
-    hide_index=True,
-    width="stretch"
-)
-
-st.subheader("Overall Property Scores")
-fig = px.bar(
-    scoring_df,
-    x="Property",
-    y="Overall Score",
-    color="Housing Type",
-    text="Overall Score",
-    title="Weighted Property Comparison"
-)
-fig.update_traces(
-    texttemplate="%{text:.1f}",
-    textposition="outside"
-)
-fig.update_yaxes(range=[0, 110])
-st.plotly_chart(fig, width="stretch")
-
-st.subheader("Property Recommendation")
-if sum(weights.values()) == 0:
-    st.warning(
-        "Select at least one importance weight above zero."
-    )
-else:
-    affordability_properties = scoring_df[scoring_df["Within Budget"]]
-    if affordability_properties.empty:
-        st.warning(
-            "None of the properties meet your monthly budget. "
-            "Review your options before making a decision."
-        )
-    else:
-        best_property = affordability_properties.iloc[0]
-        st.success(
-            f"Based on your preferences, "
-            f"{best_property['Property']} "
-            f"({best_property['Housing Type']}) "
-            f"is your highest scoring property within budget, "
-            f"with a score of "
-            f"{best_property['Overall Score']:.1f}/100"
-        )
 
 
-st.subheader("Property Comparison Table")
-st.dataframe(
-    results_df,
-    hide_index=True,
-    width="stretch"
-)
+#####################################################################
+#                                                                   #
+#                       Decision Guidance                           #
+#                                                                   #
+#####################################################################
+    st.header("Decision Guidance")
 
-
-st.header("Decision Guidance")
-
-affordable = results_df[
-    results_df["Within Budget"]
-]
-
-if affordable.empty:
-    st.warning("None of the properties meet your monthly housing budget.")
-else:
-    cheapest = affordable.loc[
-        affordable["Total Monthly Cost"].idxmin()
+    affordable = results_df[
+        results_df["Within Budget"]
     ]
-    st.success(
-        f"The lowest cost property within your budget is "
-        f"the {cheapest['Property']}, with an estimated "
-        f"monthly cost of "
-        f"${cheapest['Total Monthly Cost']:,.2f}."
-    )
 
-st.info(
-    "These estimates exclude PMI (private mortgage insurance), "
-    "closing costs, and other potential ownership expenses.  "
-    "The lowest cost property is not necessarily the best "
-    "overall choice."
-)
+    if affordable.empty:
+        st.warning("None of the properties meet your monthly housing budget.")
+    else:
+        cheapest = affordable.loc[
+            affordable["Total Monthly Cost"].idxmin()
+        ]
+        st.success(
+            f"The lowest cost property within your budget is "
+            f"the {cheapest['Property']}, with an estimated "
+            f"monthly cost of "
+            f"${cheapest['Total Monthly Cost']:,.2f}."
+        )
+
+    st.info(
+        "These estimates exclude PMI (private mortgage insurance), "
+        "closing costs, and other potential ownership expenses.  "
+        "The lowest cost property is not necessarily the best "
+        "overall choice."
+    )
 
 # form1.header("3 options to choose from")
 # home1 = form1.text_input("Enter the 1st property you're interested in")
